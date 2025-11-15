@@ -1,0 +1,80 @@
+### ==============================================
+### GESTIÓN DE SERVICIOS
+### ==============================================
+
+### Test 1: Cargar un nuevo Servicio (Iteración 1)
+### @name crearServicio
+POST http://localhost:8080/api/v1/servicios
+Content-Type: application/json
+
+{
+    "nombre": "Mantenimiento Web Mensual",
+    "precioBase": 15000,
+    "alicuota": "IVA_21"
+}
+
+### Guardamos el ID del servicio creado para usarlo después
+@servicioId = {{crearServicio.response.body.id}}
+
+### Test 2: Cargar OTRO Servicio
+POST http://localhost:8080/api/v1/servicios
+Content-Type: application/json
+
+{
+    "nombre": "Hosting Básico",
+    "precioBase": 5000,
+    "alicuota": "IVA_10_5"
+}
+
+### Test 3: Listar todos los servicios
+GET http://localhost:8080/api/v1/servicios
+
+### ==============================================
+### GESTIÓN DE CLIENTES
+### ==============================================
+
+### Test 4: Registrar un nuevo Cliente (Iteración 1)
+### @name registrarCliente
+POST http://localhost:8080/api/v1/clientes
+Content-Type: application/json
+
+{
+    "razonSocial": "Empresa Ficticia S.A.",
+    "dniCuit": "30-12345678-9",
+    "condicionIVA": "RESPONSABLE_INSCRIPTO",
+    "email": "contacto@empresa.com"
+}
+
+### Guardamos el ID del cliente creado
+@clienteId = {{registrarCliente.response.body.id}}
+
+### Test 5: Asignar un servicio contratado (Iteración 1)
+POST http://localhost:8080/api/v1/clientes/{{clienteId}}/asignar-servicio/{{servicioId}}
+
+### Test 6: Ver el detalle del cliente
+GET http://localhost:8080/api/v1/clientes/{{clienteId}}
+
+### Test 7: Listar todos los clientes
+GET http://localhost:8080/api/v1/clientes
+
+### ==============================================
+### FACTURACIÓN INDIVIDUAL (ITERACIÓN 1)
+### ==============================================
+
+### Test 8: Emitir Factura Individual
+# Cumple la H.U.: "emitir una Factura Individual..."
+### @name emitirFactura
+POST http://localhost:8080/api/v1/facturacion/emitir-individual/{{clienteId}}?vencimiento=2025-12-31
+
+### Guardamos el ID de la factura creada
+@facturaId = {{emitirFactura.response.body.id}}
+
+### Test 9: Ver el detalle de la Factura creada
+# Cumple la H.U.: "ver el detalle de la Factura..."
+# (Este test ahora SÍ funcionará)
+GET http://localhost:8080/api/v1/facturacion/{{facturaId}}
+
+### Test 10: Ver listado de facturas PENDIENTES
+# Cumple la H.U.: "ver un listado de facturas pendientes..."
+# Debería mostrarnos la factura que acabamos de crear.
+GET http://localhost:8080/api/v1/facturacion/pendientes
